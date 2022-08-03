@@ -1,0 +1,67 @@
+{
+    "NewsService": ["AllOtherGFXExtras", "MAGWIRE", "MAGWIREGFX", "OpArt", "PhotoAgentSubs",
+        "52_Places",
+        "52_places_gfx",
+        "Arena",
+        "ftptest",
+        "AllOtherGFX",
+        "AllOtherPix",
+        "Flash",
+        "NYT_Insight"
+    ],
+    "IW_Send": [
+        "photosIW",
+        "DIA",
+        "ASA",
+        "CLA",
+        "COR",
+        "DST",
+        "EGE",
+        "ELN",
+        "HAM",
+        "ISL",
+        "LIB",
+        "LPR",
+        "LSD",
+        "NJK",
+        "PAM",
+        "PRE",
+        "RAZ",
+        "REF",
+        "SEG",
+        "TOR",
+        "TRI",
+        "TST"
+    ],
+    "TDRouter": [
+        "BizNAVY",
+        "BizUP",
+        "BSL",
+        "CruiseShip",
+        "KVH",
+        "Navy",
+        "TDEE",
+        "ZONED",
+        "8PAGER"
+    ],
+    "Syndicate": [
+        "36HoursMap",
+        "Arena",
+        "LitmgGraphics",
+        "NatGeoPODEnglish",
+        "OpArt",
+        "OpArtGraphics",
+        "SyndicatePhotos",
+        "SyndicateGraphics",
+        "syntest",
+        "TravelPDFs",
+        "WorldReview",
+        "Xdaily",
+        "Xsunday"
+    ],
+    "Spending": [
+        "CAR",
+        "HON",
+        "KDJ"
+    ]
+}

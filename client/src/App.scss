@@ -1,7 +1,9 @@
 .App {
+  background-color: #f7f7f7;
   .container {
     text-align: center;
     min-height: 100px;
+    margin-top: 1em;
     padding-bottom: 3em;
     .drop-region-container {
       margin-top: 3em;
@@ -9,25 +11,27 @@
       border-radius: 10px;
       width: 80%;
       text-align: center;
-      background-color: gray;
+      background-color: #e2e2e2;
+      border: solid 1px #0000001e;
 
       .drop-region {
         pointer-events: none;
-        border: dashed 2px white;
+        //border: solid 1px #000;
         #download-btn {
-          filter: invert(1);
+          //filter: invert(1);
           margin-bottom: 30px;
         }
         #file-input {
           display: none;
         }
-        color: white;
+        color: #000000;
         border-radius: 10px;
         padding: 3em;
       }
     }
     .drop-region-container.highlight {
-      background-color: limegreen;
+      background-color: #417d40;
+      color: #fff;
     }
     .drop-region:hover {
       cursor: pointer;
@@ -37,21 +41,57 @@
       width: 78%;
       .progress-bar {
         width: 0%;
+        background-color: #417d40;
       }
     }
-    #preview {
-      margin-top: 20px;
-      img {
-        margin-top: 10px;
-        margin-bottom: 10px;
-        margin-left: auto;
-        margin-right: auto;
-        display: block;
-        max-width: 50%;
-      }
-      button {
-        max-width: 10em;
-      }
+    .table {
+      table-layout: fixed;
     }
   }
+}
+
+#uploadedimg {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+  text-align: left;
+}
+
+#uploadedimg td,
+#uploadedimg th {
+  border: 1px solid #e2e2e2;
+  padding: 8px;
+}
+
+#uploadedimg tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#uploadedimg tr:hover {
+  background-color: #e2e2e2;
+}
+
+#uploadedimg th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  color: #000;
+  font-weight: bold;
+}
+
+#preview {
+  margin-top: 20px;
+  padding: 1em;
+  border-radius: 10px;
+  width: 100%;
+  text-align: left;
+}
+
+.dropDown {
+  margin-top: 1em;
+  padding: 1em;
+  border-radius: 10px;
+  width: 50%;
+  min-width: 500px;
+  text-align: left;
 }
