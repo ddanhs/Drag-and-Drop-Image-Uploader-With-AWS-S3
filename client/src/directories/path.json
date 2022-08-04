@@ -33,7 +33,7 @@
         "TRI",
         "TST"
     ],
-    "TDRouter": [
+    "Digest": [
         "BizNAVY",
         "BizUP",
         "BSL",
@@ -63,5 +63,6 @@
         "CAR",
         "HON",
         "KDJ"
-    ]
+    ],
+    "Embargo": []
 }
