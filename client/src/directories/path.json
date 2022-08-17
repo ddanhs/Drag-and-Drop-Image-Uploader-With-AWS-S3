@@ -1,5 +1,9 @@
 {
-    "NewsService": ["AllOtherGFXExtras", "MAGWIRE", "MAGWIREGFX", "OpArt", "PhotoAgentSubs",
+    "NewsService": ["AllOtherGFXExtras",
+        "MAGWIRE",
+        "MAGWIREGFX",
+        "OpArt",
+        "PhotoAgentSubs",
         "52_Places",
         "52_places_gfx",
         "Arena",

@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React from "react";
 import "./App.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
@@ -15,11 +15,10 @@ class App extends React.Component {
     images: [],
     progress: 0,
     directory: "",
-    // TODO: Set embargo to path???
-    path: "undefined",
-    embargoDate: "",
+    path: "",
     currentDate: date,
     renderSelector: "",
+    renderNoti: "",
   };
   preventDefaults = (e) => {
     e.preventDefault();
@@ -28,20 +27,26 @@ class App extends React.Component {
 
   uploadFile = (files) => {
     const formData = new FormData();
+
     this.setState({
       progress: 0,
     });
-    if (this.state.directory == "Embargo") {
-      formData.append(
-        "newKey",
-        `${this.state.directory}/${this.state.embargoDate}/`
-      );
-    } else {
-      formData.append("newKey", `${this.state.directory}/${this.state.path}/`);
-    }
+
+    formData.append("newKey", `${this.state.directory}/${this.state.path}/`);
+
     files.forEach((file) => {
-      formData.append("files", file, file.name);
+      const fileType = file.name.split(".").pop().toLowerCase();
+      console.log("File name is: " + file.name);
+      console.log("File Type is: " + fileType);
+      if (fileType === "png" || fileType === "jpeg" || fileType === "pdf") {
+        formData.append("files", file, file.name);
+      } else {
+        this.setState({
+          renderNoti: this.renderNotification("BadFileType"),
+        });
+      }
     });
+
     axios
       .post("/upload-image", formData, {
         headers: {
@@ -75,25 +80,67 @@ class App extends React.Component {
       .forEach((element) => {
         const dataSplit = element.split("/");
 
-        const images = this.state.images;
-        this.setState({
-          images: images.concat({
-            fileName: dataSplit[dataSplit.length - 1],
-            destPath:
-              dataSplit[dataSplit.length - 3] +
-              "/" +
-              dataSplit[dataSplit.length - 2],
-            link: "tba!",
-          }),
-        });
+        if (
+          dataSplit[dataSplit.length - 1] !== "" &&
+          (dataSplit[dataSplit.length - 3] !== "undefined" ||
+            dataSplit[dataSplit.length - 2] !== "undefined")
+        ) {
+          const images = this.state.images;
+          this.setState({
+            images: images.concat({
+              fileName: dataSplit[dataSplit.length - 1],
+              destPath:
+                dataSplit[dataSplit.length - 3] +
+                "/" +
+                dataSplit[dataSplit.length - 2],
+              link: "tba!",
+            }),
+          });
+        }
       });
+  };
+
+  validateUpload = () => {
+    console.log(
+      "This is the path we're validating: " + JSON.stringify(this.state.path)
+    );
+
+    if (this.state.directory === "") {
+      this.setState({
+        renderNoti: this.renderNotification("UndefinedDir"),
+      });
+      return false;
+    } else if (this.state.directory !== "Embargo" && this.state.path === "") {
+      this.setState({
+        renderNoti: this.renderNotification("UndefinedPath"),
+      });
+      return false;
+    } else if (this.state.directory === "Embargo" && this.state.path === "") {
+      this.setState({
+        renderNoti: this.renderNotification("UndefinedDate"),
+      });
+      return false;
+    } else if (
+      this.state.directory === "Embargo" &&
+      typeof this.state.path === "object"
+    ) {
+      this.setState({
+        renderNoti: this.renderNotification("BadDate"),
+      });
+      return false;
+    } else {
+      this.setState({ renderNoti: "", errorType: "" });
+      return true;
+    }
   };
 
   handleDrop = (e) => {
     e.preventDefault();
     const files = e.dataTransfer.files;
-    // TODO: check everything is defined pls
-    this.uploadFile(Array.from(files));
+    // TODO: check everything is defined pls + also check file type
+    if (this.validateUpload()) {
+      this.uploadFile(Array.from(files));
+    }
   };
 
   handleDragOver = (e) => {
@@ -102,19 +149,27 @@ class App extends React.Component {
 
   handleInputByClick = (e) => {
     // TODO: check everything is defined pls
-    this.uploadFile(Array.from(e.target.files));
+    e.preventDefault();
+    if (this.validateUpload()) {
+      this.uploadFile(Array.from(e.target.files));
+    }
   };
 
   handleDrop1Change = (e) => {
     console.log("Handle Directory Dropdown Change e:");
     console.log(e);
-    if (e == "Embargo") {
+    if (e === "Embargo") {
       this.setState({
         directory: e,
         renderSelector: this.renderDatepickerField(),
+        path: "",
       });
     } else {
-      this.setState({ directory: e, renderSelector: this.renderPathField(e) });
+      this.setState({
+        directory: e,
+        renderSelector: this.renderPathField(e),
+        path: "",
+      });
     }
   };
 
@@ -122,12 +177,6 @@ class App extends React.Component {
     console.log("Handle Path Dropdown Change e:");
     console.log(e);
     this.setState({ path: e });
-  };
-
-  handleDateChange = (e) => {
-    console.log("Handle Date Change e:");
-    console.log(e);
-    this.setState({ embargoDate: e });
   };
 
   renderPathField = (e) => {
@@ -146,25 +195,53 @@ class App extends React.Component {
     );
   };
 
-  //getMessage function - returns "" or error if date isn't correct
-
   renderDatepickerField = () => {
     return (
       <Field
         label="Select a date to release a file:"
-        // message={getMessage(this.embargoDate)}
-        // error={!!getMessage(this.embargoDate)}
+        // message={this.getMessage()}
+        // error={!!this.getMessage()}
         id="dwv-field"
       >
         <Datepicker
-          // value={value}
-          // TODO: change to handleDrop2Change ?? set path to date
-          onChange={this.handleDateChange}
+          onChange={this.handleDrop2Change}
           firstSelectableDate={this.currentDate}
           id="dwv"
         />
       </Field>
     );
+  };
+
+  handleNotificationClick = () => {
+    this.setState({ renderNoti: "" });
+  };
+
+  renderNotification = (errorType) => {
+    return (
+      <div class="alert">
+        <span class="closebtn" onClick={this.handleNotificationClick}>
+          &times;
+        </span>
+        <strong>Files Upload Error!</strong> {this.getMessage(errorType)}
+      </div>
+    );
+  };
+
+  //getMessage function - returns "" or error if date isn't correct
+  getMessage = (errorType) => {
+    if (errorType === "UndefinedDir") {
+      return "Directory is undefined! Please select a directory in the dropdown. If error persists, please refresh the page.";
+    } else if (errorType === "UndefinedPath") {
+      return "Path is undefined! Please select a path in the dropdown. If error persists, please refresh the page.";
+    } else if (errorType === "UndefinedDate") {
+      return "Embargo date is undefined! Please select a valid date in MM/DD/YY format. If error persists, please refresh the page.";
+    } else if (errorType === "BadDate") {
+      return "Embargo date is not valid. Please select a valid date in MM/DD/YY format. If error persists, please refresh the page.";
+    } else if (errorType === "BadFileType") {
+      return "File type is not supported. Please upload only JPEG/PNG/PSD  If error persists, please refresh the page.";
+    } else {
+      return "";
+    }
   };
 
   componentDidMount() {
@@ -214,6 +291,8 @@ class App extends React.Component {
             <p className="mx-auto"></p>
             {this.state.renderSelector}
           </div>
+
+          <div>{this.state.renderNoti}</div>
 
           <div
             id="drop-region-container"
