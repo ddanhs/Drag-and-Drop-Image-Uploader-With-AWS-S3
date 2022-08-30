@@ -13,6 +13,7 @@ const date = `${current.getDate()}/${
 class App extends React.Component {
   state = {
     images: [],
+    errorFile: [],
     progress: 0,
     directory: "",
     path: "",
@@ -44,6 +45,11 @@ class App extends React.Component {
         this.setState({
           renderNoti: this.renderNotification("BadFileType"),
         });
+        this.previewFile(
+          file.name,
+          "error",
+          "This path only accepts x, y, z types!"
+        );
       }
     });
 
@@ -61,7 +67,7 @@ class App extends React.Component {
         },
       })
       .then((res) => {
-        this.previewFile(res.data);
+        this.previewFile(res.data, "preview", "");
         setTimeout(() => {
           this.setState({
             progress: 0,
@@ -73,7 +79,7 @@ class App extends React.Component {
       });
   };
 
-  previewFile = (data) => {
+  previewFile = (data, type, errorMsg) => {
     data
       .toString()
       .split(",")
@@ -85,17 +91,31 @@ class App extends React.Component {
           (dataSplit[dataSplit.length - 3] !== "undefined" ||
             dataSplit[dataSplit.length - 2] !== "undefined")
         ) {
-          const images = this.state.images;
-          this.setState({
-            images: images.concat({
-              fileName: dataSplit[dataSplit.length - 1],
-              destPath:
-                dataSplit[dataSplit.length - 3] +
-                "/" +
-                dataSplit[dataSplit.length - 2],
-              link: "tba!",
-            }),
-          });
+          if (type === "preview") {
+            const images = this.state.images;
+            this.setState({
+              images: images.concat({
+                fileName: dataSplit[dataSplit.length - 1],
+                destPath:
+                  dataSplit[dataSplit.length - 3] +
+                  "/" +
+                  dataSplit[dataSplit.length - 2],
+                link: "tba!",
+              }),
+            });
+          } else if (type === "error") {
+            const errorFile = this.state.errorFile;
+            this.setState({
+              errorFile: errorFile.concat({
+                fileName: dataSplit[dataSplit.length - 1],
+                destPath:
+                  dataSplit[dataSplit.length - 3] +
+                  "/" +
+                  dataSplit[dataSplit.length - 2],
+                error: errorMsg,
+              }),
+            });
+          }
         }
       });
   };
@@ -326,6 +346,26 @@ class App extends React.Component {
             >
               {progress}%
             </div>
+          </div>
+
+          <div id="preview">
+            <table id="uploadedimg">
+              <tbody>
+                <tr>
+                  <th>FAILED File Name</th>
+                  <th>Key</th>
+                  <th>Error Message</th>
+                </tr>
+
+                {this.state.errorFile.map((image, index) => (
+                  <tr key={index}>
+                    <td>{image.fileName}</td>
+                    <td>{image.destPath}</td>
+                    <td>{image.error}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
           <div id="preview">
