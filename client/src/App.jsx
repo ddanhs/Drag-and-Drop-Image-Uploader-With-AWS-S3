@@ -3,6 +3,7 @@ import "./App.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import { H1, Listbox, Field, Datepicker } from "@nyt-cms/ink";
+import { TimePicker, formatReturnTime } from "@twilio-paste/core/time-picker";
 import * as pathOptions from "./directories/path.json";
 
 const current = new Date();
@@ -17,6 +18,7 @@ class App extends React.Component {
     progress: 0,
     directory: "",
     path: "",
+    pathTime: "",
     currentDate: date,
     renderSelector: "",
     renderNoti: "",
@@ -33,7 +35,11 @@ class App extends React.Component {
       progress: 0,
     });
 
-    formData.append("newKey", `${this.state.directory}/${this.state.path}/`);
+    let newKey = `${this.state.directory}/${this.state.path}/`;
+    if (this.state.directory === "Embargo") {
+      newKey += `${this.state.pathTime}/`;
+    }
+    formData.append("newKey", newKey);
 
     files.forEach((file) => {
       const fileType = file.name.split(".").pop().toLowerCase();
@@ -108,10 +114,7 @@ class App extends React.Component {
             this.setState({
               errorFile: errorFile.concat({
                 fileName: dataSplit[dataSplit.length - 1],
-                destPath:
-                  dataSplit[dataSplit.length - 3] +
-                  "/" +
-                  dataSplit[dataSplit.length - 2],
+                destPath: `${this.state.directory}/${this.state.path}/`,
                 error: errorMsg,
               }),
             });
@@ -146,6 +149,14 @@ class App extends React.Component {
     ) {
       this.setState({
         renderNoti: this.renderNotification("BadDate"),
+      });
+      return false;
+    } else if (
+      this.state.directory === "Embargo" &&
+      this.state.pathTime === ""
+    ) {
+      this.setState({
+        renderNoti: this.renderNotification("UndefinedTime"),
       });
       return false;
     } else {
@@ -183,12 +194,14 @@ class App extends React.Component {
         directory: e,
         renderSelector: this.renderDatepickerField(),
         path: "",
+        pathTime: "",
       });
     } else {
       this.setState({
         directory: e,
         renderSelector: this.renderPathField(e),
         path: "",
+        pathTime: "",
       });
     }
   };
@@ -197,6 +210,12 @@ class App extends React.Component {
     console.log("Handle Path Dropdown Change e:");
     console.log(e);
     this.setState({ path: e });
+  };
+
+  handleDrop3Change = (e) => {
+    console.log("Handle Time Dropdown Change e:");
+    console.log(formatReturnTime(e.target.value, "HH-mm"));
+    this.setState({ pathTime: formatReturnTime(e.target.value, "HH-mm") });
   };
 
   renderPathField = (e) => {
@@ -217,18 +236,28 @@ class App extends React.Component {
 
   renderDatepickerField = () => {
     return (
-      <Field
-        label="Select a date to release a file:"
-        // message={this.getMessage()}
-        // error={!!this.getMessage()}
-        id="dwv-field"
-      >
-        <Datepicker
-          onChange={this.handleDrop2Change}
-          firstSelectableDate={this.currentDate}
-          id="dwv"
+      <div>
+        <Field
+          label="Select a date and time to release a file:"
+          // message={this.getMessage()}
+          // error={!!this.getMessage()}
+          id="dwv-field"
+        >
+          <Datepicker
+            onChange={this.handleDrop2Change}
+            firstSelectableDate={this.currentDate}
+            id="dwv"
+          />
+        </Field>
+
+        <TimePicker
+          aria-describedby="Time Picker For Embargo"
+          id="timepick"
+          name="foo"
+          onChange={this.handleDrop3Change}
+          required
         />
-      </Field>
+      </div>
     );
   };
 
@@ -257,6 +286,8 @@ class App extends React.Component {
       return "Embargo date is undefined! Please select a valid date in MM/DD/YY format. If error persists, please refresh the page.";
     } else if (errorType === "BadDate") {
       return "Embargo date is not valid. Please select a valid date in MM/DD/YY format. If error persists, please refresh the page.";
+    } else if (errorType === "UndefinedTime") {
+      return "Embargo time is undefined. Please select a valid time in hh:mm aa format. If error persists, please refresh the page.";
     } else if (errorType === "BadFileType") {
       return "File type is not supported. Please upload only JPEG/PNG/PSD  If error persists, please refresh the page.";
     } else {
